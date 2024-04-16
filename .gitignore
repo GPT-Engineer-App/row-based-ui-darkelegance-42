@@ -1,3 +1,13 @@
 # Supabase
 .env
 node_modules
+
+# Node.js
+npm-debug.log
+yarn-error.log
+
+# React
+build/
+dist/
+public/
+.DS_Store
