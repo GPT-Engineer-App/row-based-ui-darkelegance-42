@@ -3,10 +3,10 @@ import { Tr, Td, Button, Box } from "@chakra-ui/react";
 import { FaExpandAlt, FaExternalLinkAlt } from "react-icons/fa";
 import ResultTag from "./ResultTag";
 
-const ExpandButtonTd = ({ toggleExpand }) => (
+const ExpandButtonTd = ({ item, toggleExpand }) => (
   <Td p={1}>
-    <Button variant="unstyled" onClick={toggleExpand}>
-      <Box p={1}>
+    <Button variant="unstyled" onClick={() => toggleExpand(item)}>
+      <Box p={1} display="flex" justifyContent="center">
         <FaExpandAlt />
       </Box>
     </Button>
@@ -38,15 +38,15 @@ const ChatHistoryTd = ({ chatHistory, openChatHistory }) => (
 
 const getRowBg = (index) => (index % 2 === 0 ? "gray.900" : "gray.700");
 
-const TableRow = ({ item, index, toggleExpand, openChatHistory }) => (
+const TableRow = ({ item, index, toggleExpand }) => (
   <Tr key={item.id} bg={getRowBg(index)} color="white">
-    <ExpandButtonTd toggleExpand={toggleExpand} />
+    <ExpandButtonTd item={item} toggleExpand={toggleExpand} />
     <ResultTd result={item.result} />
     <TextTd>{item.personal_injury ? "Yes" : "No"}</TextTd>
     <TextTd>{item.case_started}</TextTd>
     <TextTd>{item.situation_begin}</TextTd>
     <TextTd>{item.created_at.slice(0, 16)}</TextTd>
-    <ChatHistoryTd chatHistory={item.chat_history} openChatHistory={openChatHistory} />
+    {/* <ChatHistoryTd chatHistory={item.chat_history} openChatHistory={openChatHistory} /> */}
   </Tr>
 );
 

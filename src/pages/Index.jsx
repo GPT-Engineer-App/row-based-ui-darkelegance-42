@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Table, Thead, Tbody, TableContainer } from "@chakra-ui/react";
 import ExpandedPage from "../components/ExpandedPage";
 import TableHeader from "../components/TableHeader";
 import TableRow from "../components/TableRow";
-import ChatHistoryModal from "../components/ChatHistoryModal";
 import { supabase } from "../lib/helper/supabase.js";
+import { isEqual } from "lodash";
+import Navbar from "../components/Navbar";
 
 const data = [
   {
@@ -58,8 +59,11 @@ const Index = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isChatHistoryOpen, setIsChatHistoryOpen] = useState(false);
   const [selectedChatHistory, setSelectedChatHistory] = useState("");
+  const [chatbotResults, setChatbotResults] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(null);
 
-  const toggleExpand = () => {
+  const toggleExpand = (item) => {
+    setSelectedItem(item);
     setIsExpanded(!isExpanded);
   };
 
@@ -68,22 +72,66 @@ const Index = () => {
     setIsChatHistoryOpen(true);
   };
 
+  const fetchChatbotResults = async () => {
+    const { data, error } = await supabase.from('chatbot_results').select("*");
+
+    if (error) {
+      console.error('Error fetching chatbot results:', error);
+    } else {
+      const formattedData = data.map((item) => ({
+        id: item.uuid,
+        created_at: item.created_at,
+        case_started: item.case_started,
+        short_summary: item.short_summary,
+        personal_injury: item.personal_injury,
+        result: item.result,
+        situation_begin: item.situation_begin,
+        type_injury: item.type_injury,
+        what_happened: item.what_happened,
+        how_happened: item.how_happened,
+        chat_history: item.chat_history,
+        annotations: item.annotations,
+        parties_involved: item.parties_involved,
+        consequences: item.consequences,
+        cost: item.cost,
+        direct_cause: item.direct_cause,
+      }));
+
+      if (!isEqual(formattedData, chatbotResults)) {
+        setChatbotResults(formattedData);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchChatbotResults();
+    const interval = setInterval(fetchChatbotResults, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <Box bg="gray.900" minH="100vh" p={4}>
+    <Box bg="gray.900" minH="100vh">
+      <Navbar />
       <TableContainer>
         <Table variant="simple" size="md">
           <Thead>
             <TableHeader />
           </Thead>
           <Tbody>
-            {data.map((item, index) => (
-              <TableRow key={item.id} item={item} index={index} toggleExpand={toggleExpand} openChatHistory={openChatHistory} />
+            {chatbotResults.map((item, index) => (
+              <TableRow
+                key={item.id}
+                item={item}
+                index={index}
+                toggleExpand={() => toggleExpand(item)}
+              // openChatHistory={openChatHistory}
+              />
             ))}
           </Tbody>
         </Table>
       </TableContainer>
-      <ExpandedPage isOpen={isExpanded} onClose={toggleExpand} />
-      <ChatHistoryModal isOpen={isChatHistoryOpen} onClose={() => setIsChatHistoryOpen(false)} chatHistory={selectedChatHistory} />
+      <ExpandedPage isOpen={isExpanded} onClose={toggleExpand} item={selectedItem} />
+      {/* <ChatHistoryModal isOpen={isChatHistoryOpen} onClose={() => setIsChatHistoryOpen(false)} chatHistory={selectedChatHistory} /> */}
     </Box >
   );
 };
