@@ -112,6 +112,7 @@ const Index = () => {
   return (
     <Box bg="gray.900" minH="100vh">
       <Navbar />
+      asd
       <TableContainer>
         <Table variant="simple" size="md">
           <Thead>
